@@ -1,6 +1,8 @@
+Package.Require("Shared/Utils.lua")
 Package.Require("Shared/Core.lua")
 Package.Require("Shared/Config.lua")
 Package.Require("Server/modules/PlayerManager.lua")
+Package.Require("Server/modules/ChatCommands.lua")
 
 function DarkRP.Init()
     print("[DarkRP] Init started.")

@@ -130,6 +130,13 @@ function SpawnPlayer(player, location, rotation)
 
 	player:Possess(new_char)
 
+    local player_infos = DarkRP.GetPlayerInfos(player)
+
+    new_char:SetValue("Name", player_infos[1]["rp_name"])
+    new_char:SetValue("Wallet", player_infos[1]["wallet"])
+    new_char:SetValue("Salary", player_infos[1]["salary"])
+    new_char:SetValue("Job", DarkRP.Config.DefaultJob)
+    
 	-- Subscribe to Death event
 	new_char:Subscribe("Death", OnPlayerCharacterDeath)
 
@@ -166,6 +173,25 @@ function DarkRP.RegisterPlayer(player)
     else
         print("[DarkRP] Player registered in DB: " .. steam_id)
     end
+end
+
+function DarkRP.GetPlayerInfos(player)
+    local steam_id = player:GetSteamID()
+
+    local query = [[
+        SELECT * FROM darkrp_players
+        WHERE steam_id = :0
+    ]]
+
+    local result, err = DarkRP.DB:Select(query, steam_id)
+
+    if err then
+        print("[DarkRP] Error while fetching player's informations: " .. err)
+    else
+        print("[DarkRP] Player's informations fetcht successfully!")
+        return result
+    end
+
 end
 
 

@@ -5,10 +5,12 @@
 --]]
 
 DarkRP.Config = DarkRP.Config or {}
+DarkRP.Config.DefaultJob = "Citizen"
 DarkRP.Config.Currency = "$"
 DarkRP.Config.DefaultSalary = 45
 DarkRP.Config.DefaultWallet = 500
 DarkRP.Config.SalaryInterval = 60 -- in second
+DarkRP.Config.SetRPNameCommand = "/setrpname"
 
 
 -- List of Character Meshes
