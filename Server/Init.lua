@@ -1,11 +1,11 @@
 Package.Require("Shared/Core.lua")
 Package.Require("Shared/Config.lua")
--- Package.Require("Server/modules/PlayerManager.lua")
+Package.Require("Server/modules/PlayerManager.lua")
 
 function DarkRP.Init()
     print("[DarkRP] Init started.")
 
-    local sqlite_db = Database(DatabaseEngine.SQLite, "db=darkrp-sqlite.db timeout=2")
+    DarkRP.DB = Database(DatabaseEngine.SQLite, "db=darkrp-sqlite.db timeout=2")
 
     local query = [[
         CREATE TABLE IF NOT EXISTS darkrp_players (
@@ -19,7 +19,7 @@ function DarkRP.Init()
 
     query = query:format(DarkRP.Config.DefaultSalary, DarkRP.Config.DefaultWallet)
 
-    local rows, err = sqlite_db:Execute(query)
+    local rows, err = DarkRP.DB:Execute(query)
 
     if err then
         
@@ -29,5 +29,4 @@ function DarkRP.Init()
     end
 
     print("[DarkRP] Init completed.")
-
 end
