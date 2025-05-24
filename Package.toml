@@ -1,9 +1,11 @@
 # vault configurations
 [meta]
+    # friendly name
     title =                 "darkrp"
+    # contributors
     author =                "TheObtey"
+    # version
     version =               "0.1.0"
-    description =           "A modern version of the Garry's Mod DarkRP gamemode"
 
 # game-mode configurations
 [game_mode]
@@ -14,22 +16,22 @@
     # whether to load all level entities on client - only enable it if your package needs to use level static meshes entities
     load_level_entities =   false
     # the game version (major.minor) at the time this package was created, for granting compatibility between breaking changes
-    compatibility_version = "1.25"
+    compatibility_version = "1.29"
     # packages requirements
     packages_requirements = [
-
+                            
     ]
     # asset packs requirements
     assets_requirements = [
-
+                            
     ]
     # compatible maps - maps to be highlighted when starting a new game through main menu
     compatible_maps = [
-
+                            
     ]
 
 # game-mode custom settings configurations
 # those settings can be configured through new game menu, Config.toml and server command line
 # and can be accessed through Server.GetCustomSettings() method from any package
 [custom_settings]
-    # my_toggle = { label = "awesome toggle", type = "boolean", description = "press this!", default = true }
+    # my_toggle_example = { label = "awesome toggle", type = "boolean", description = "press this!", default = true }
