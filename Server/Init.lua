@@ -10,7 +10,7 @@ function DarkRP.Init()
     local query = [[
         CREATE TABLE IF NOT EXISTS darkrp_players (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            steam_id TEXT UNIQUE,
+            steam_id TEXT UNIQUE NOT NULL,
             rp_name TEXT,
             salary INTEGER DEFAULT %i,
             wallet INTEGER DEFAULT %i
