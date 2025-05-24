@@ -36,6 +36,6 @@ function DarkRP.RegisterPlayer(pPlayer)
     end
 end
 
-Player:Subscribe("Spawn", function(pPlayer)
+Player.Subscribe("Spawn", function(pPlayer)
     DarkRP.RegisterPlayer(pPlayer)
 end)
