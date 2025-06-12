@@ -24,10 +24,8 @@ function DarkRP.Init()
     local rows, err = DarkRP.DB:Execute(query)
 
     if err then
-        
         print("[DarkRP] An error has occured: " .. err)
         return
-
     end
 
     print("[DarkRP] Init completed.")
