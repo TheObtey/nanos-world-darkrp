@@ -8,14 +8,16 @@ function DarkRP.SetRPName(player, name)
     local steam_id = tostring(player:GetSteamID()) or ""
 
     local query = [[
-        UPDATE darkrp_players SET rp_name = ':0'
-        WHERE steam_id = ':1'
+        UPDATE darkrp_players SET rp_name = :0
+        WHERE steam_id = :1
     ]]
 
     local row, err = DarkRP.DB:Execute(query, name, steam_id)
 
     if err then
         print("[DarkRP] An error has occured when updating player's rp name: " .. err)
+    elseif row ~= 1 then
+        print("[DarkRP] Failed to update player's rp name: expected 1 affected row, got " .. tostring(row))
     else
         print("[DarkRP] Player's name successfully updated")
     end
