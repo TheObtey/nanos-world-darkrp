@@ -260,18 +260,30 @@ Events.SubscribeRemote("RespawnCharacter", function(player)
 end)
 
 Events.SubscribeRemote("SelectCharacterMesh", function(player, mesh)
-	local chararacter = player:GetControlledCharacter()
+	if (not NanosUtils.IsEntityValid(player) or not player:IsA(Player)) then return end
+	if (type(mesh) ~= "string" or mesh == "") then return end
 
-	if (chararacter) then
-		chararacter:SetMesh(mesh)
-
-		chararacter:RemoveAllSkeletalMeshesAttached()
-		chararacter:RemoveAllStaticMeshesAttached()
-
-		chararacter:ClearMorphTargets()
-
-		CustomizeCharacter(chararacter, mesh)
+	local is_allowed = false
+	for _, configured_mesh in ipairs(DarkRP.Config.CHARACTER_MESHES) do
+		if (mesh == configured_mesh) then
+			is_allowed = true
+			break
+		end
 	end
+	if (not is_allowed) then return end
+
+	local character = player:GetControlledCharacter()
+	if (not NanosUtils.IsEntityValid(character) or not character:IsA(Character)) then return end
+	if (character:GetPlayer() ~= player) then return end
+
+	character:SetMesh(mesh)
+
+	character:RemoveAllSkeletalMeshesAttached()
+	character:RemoveAllStaticMeshesAttached()
+
+	character:ClearMorphTargets()
+
+	CustomizeCharacter(character, mesh)
 end)
 
 Package.Subscribe("Unload", function()
