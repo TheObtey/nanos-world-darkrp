@@ -121,22 +121,46 @@ function OnPlayerCharacterDeath(chara, last_damage_taken, last_bone_damaged, dam
 	)
 end
 
+local function IsInteger(value)
+    return type(value) == "number" and value % 1 == 0
+end
+
 function SpawnPlayer(player, location, rotation)
+	if (not NanosUtils.IsEntityValid(player) or not player:IsA(Player)) then
+		print("[DarkRP] Failed to spawn player: invalid Player entity")
+		return
+	end
+
+	local character = player:GetControlledCharacter()
+	if (NanosUtils.IsEntityValid(character)) then return character end
+
+    local player_infos, err = DarkRP.RegisterPlayer(player)
+    if not player_infos then
+        print("[DarkRP] Failed to spawn player: " .. tostring(err))
+        return
+    end
+
+    local profile = player_infos[1]
+    local display_name = profile.rp_name
+    if display_name == nil then display_name = player:GetName() end
+    if type(display_name) ~= "string" then
+        print("[DarkRP] Failed to spawn player: invalid display name")
+        return
+    end
+
 	local new_char = SpawnCharacterRandomized(location, rotation)
 
 	if (not SANDBOX_CUSTOM_SETTINGS.enable_pvp) then
 		new_char:SetTeam(1)
 	end
 
+    new_char:SetValue("Name", display_name)
+    new_char:SetValue("Wallet", profile.wallet)
+    new_char:SetValue("Salary", profile.salary)
+    new_char:SetValue("Job", DarkRP.Config.DefaultJob)
+
 	player:Possess(new_char)
 
-    local player_infos = DarkRP.GetPlayerInfos(player)
-
-    new_char:SetValue("Name", player_infos[1]["rp_name"])
-    new_char:SetValue("Wallet", player_infos[1]["wallet"])
-    new_char:SetValue("Salary", player_infos[1]["salary"])
-    new_char:SetValue("Job", DarkRP.Config.DefaultJob)
-    
 	-- Subscribe to Death event
 	new_char:Subscribe("Death", OnPlayerCharacterDeath)
 
@@ -144,61 +168,79 @@ function SpawnPlayer(player, location, rotation)
 	new_char:Subscribe("UnPossess", function(self)
 		self:Unsubscribe("Death", OnPlayerCharacterDeath)
 	end)
+
+    return new_char
 end
 
 function DarkRP.RegisterPlayer(player)
-    local steam_id = player:GetSteamID()
+    local rows, err = DarkRP.GetPlayerInfos(player)
+    if not rows then return nil, err end
+    if #rows == 1 then return rows end
 
-    local check_query = [[
-        SELECT * FROM darkrp_players
-        WHERE steam_id = :0
-    ]]
-
-    local rows = DarkRP.DB:Select(check_query, steam_id)
-
-    if rows and #rows > 0 then
-        print("[DarkRP] Player already exists in DB: " .. steam_id)
-        return
+    if not IsInteger(DarkRP.Config.DefaultSalary) or not IsInteger(DarkRP.Config.DefaultWallet) then
+        return nil, "invalid configured salary or wallet"
     end
 
     local insert_query = [[
-        INSERT INTO darkrp_players (steam_id)
-        VALUES (:0)
+        INSERT INTO darkrp_players (steam_id, salary, wallet)
+        VALUES (:0, :1, :2)
     ]]
 
-    local result, err = DarkRP.DB:Execute(insert_query, steam_id)
+    local result
+    result, err = DarkRP.DB:Execute(insert_query, player:GetSteamID(), DarkRP.Config.DefaultSalary, DarkRP.Config.DefaultWallet)
+    if err then return nil, "error while inserting player in DB: " .. err end
+    if result ~= 1 then return nil, "expected one inserted profile, got " .. tostring(result) end
 
-    if err then
-        print("[DarkRP] Error while inserting player in DB: " .. err)
-    else
-        print("[DarkRP] Player registered in DB: " .. steam_id)
-    end
+    rows, err = DarkRP.GetPlayerInfos(player)
+    if not rows then return nil, err end
+    if #rows ~= 1 then return nil, "profile missing after insertion" end
+
+    return rows
 end
 
 function DarkRP.GetPlayerInfos(player)
+    if not NanosUtils.IsEntityValid(player) or not player:IsA(Player) then
+        return nil, "invalid Player entity"
+    end
+
     local steam_id = player:GetSteamID()
+    if type(steam_id) ~= "string" or steam_id == "" then return nil, "invalid Steam ID" end
+    if not NanosUtils.IsEntityValid(DarkRP.DB) then return nil, "database is not initialized" end
 
     local query = [[
-        SELECT * FROM darkrp_players
+        SELECT *, typeof(wallet) AS wallet_type, typeof(salary) AS salary_type,
+            typeof(rp_name) AS rp_name_type
+        FROM darkrp_players
         WHERE steam_id = :0
     ]]
 
     local result, err = DarkRP.DB:Select(query, steam_id)
+    if err then return nil, "error while fetching player profile: " .. err end
+    if type(result) ~= "table" then return nil, "invalid profile query result" end
 
-    if err then
-        print("[DarkRP] Error while fetching player's informations: " .. err)
-    else
-        print("[DarkRP] Player's informations fetcht successfully!")
-        return result
+    if next(result) ~= nil then
+        local profile = result[1]
+        if #result ~= 1 or type(profile) ~= "table" then return nil, "expected one player profile" end
+        if profile.steam_id ~= steam_id then return nil, "profile Steam ID mismatch" end
+        if profile.wallet_type ~= "integer" or profile.salary_type ~= "integer"
+            or not IsInteger(profile.wallet) or not IsInteger(profile.salary) then
+            return nil, "invalid profile wallet or salary"
+        end
+        if (profile.rp_name_type ~= "null" and profile.rp_name_type ~= "text")
+            or (profile.rp_name ~= nil and type(profile.rp_name) ~= "string") then
+            return nil, "invalid profile RP name"
+        end
+
+        profile.wallet_type, profile.salary_type, profile.rp_name_type = nil, nil, nil
     end
 
+    return result
 end
 
 
 Player.Subscribe("Spawn", function(player)
 	Chat.BroadcastMessage("<cyan>" .. player:GetName() .. "</> has joined the server")
-    
-    DarkRP.RegisterPlayer(player)
+
 	SpawnPlayer(player)
 end)
 
