@@ -5,9 +5,16 @@ Package.Require("Server/modules/PlayerManager.lua")
 Package.Require("Server/modules/ChatCommands.lua")
 
 function DarkRP.Init()
+    if NanosUtils.IsEntityValid(DarkRP.DB) then return true end
+    DarkRP.DB = nil
+
     print("[DarkRP] Init started.")
 
-    DarkRP.DB = Database(DatabaseEngine.SQLite, "db=darkrp-sqlite.db timeout=2")
+    local database = Database(DatabaseEngine.SQLite, "db=darkrp-sqlite.db timeout=2")
+    if not NanosUtils.IsEntityValid(database) then
+        print("[DarkRP] Failed to initialize database: connection unavailable")
+        return false
+    end
 
     local query = [[
         CREATE TABLE IF NOT EXISTS darkrp_players (
@@ -21,12 +28,15 @@ function DarkRP.Init()
 
     query = query:format(DarkRP.Config.DefaultSalary, DarkRP.Config.DefaultWallet)
 
-    local rows, err = DarkRP.DB:Execute(query)
+    local rows, err = database:Execute(query)
 
-    if err then
-        print("[DarkRP] An error has occured: " .. err)
-        return
+    if err or type(rows) ~= "number" then
+        database:Close()
+        print("[DarkRP] Failed to initialize database: " .. tostring(err or "invalid schema query result"))
+        return false
     end
 
+    DarkRP.DB = database
     print("[DarkRP] Init completed.")
+    return true
 end
