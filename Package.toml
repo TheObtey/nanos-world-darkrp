@@ -19,15 +19,15 @@
     compatibility_version = "1.29"
     # packages requirements
     packages_requirements = [
-                            
+
     ]
     # asset packs requirements
     assets_requirements = [
-                            
+
     ]
     # compatible maps - maps to be highlighted when starting a new game through main menu
     compatible_maps = [
-                            
+
     ]
 
 # game-mode custom settings configurations

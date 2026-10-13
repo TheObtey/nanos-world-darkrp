@@ -1,43 +1,44 @@
-Package.Require("Shared/Utils.lua")
 Package.Require("Shared/Core.lua")
 Package.Require("Shared/Config.lua")
-Package.Require("Server/DatabaseService.lua")
-Package.Require("Server/modules/PlayerManager.lua")
-Package.Require("Server/modules/ChatCommands.lua")
+Package.Require("Shared/Utils.lua")
+
+local Bootstrap = Package.Require("Server/Bootstrap.lua")
+local bootstrap
 
 function DarkRP.Init()
-    if NanosUtils.IsEntityValid(DarkRP.DB) then return true end
-    DarkRP.DB = nil
+    if bootstrap then return true end
 
-    print("[DarkRP] Init started.")
+    local instance = Bootstrap.New(DarkRP.Config)
+    local success, err = instance:Initialize()
 
-    local database = Database(DatabaseEngine.SQLite, "db=darkrp-sqlite.db timeout=2")
-    if not NanosUtils.IsEntityValid(database) then
-        print("[DarkRP] Failed to initialize database: connection unavailable")
+    if not success then
+        print("Initialization failed: " .. tostring(err))
         return false
     end
 
-    local query = [[
-        CREATE TABLE IF NOT EXISTS darkrp_players (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            steam_id TEXT UNIQUE NOT NULL,
-            rp_name TEXT,
-            salary INTEGER DEFAULT %i,
-            wallet INTEGER DEFAULT %i
-        )
-    ]]
+    bootstrap = instance
 
-    query = query:format(DarkRP.Config.DefaultSalary, DarkRP.Config.DefaultWallet)
-
-    local rows, err = database:Execute(query)
-
-    if err or type(rows) ~= "number" then
-        database:Close()
-        print("[DarkRP] Failed to initialize database: " .. tostring(err or "invalid schema query result"))
-        return false
-    end
-
-    DarkRP.DB = database
-    print("[DarkRP] Init completed.")
-    return true
+    print("Initialization completed")
+    return true 
 end
+
+Package.Subscribe("Load", function()
+    if not bootstrap then return end
+
+    bootstrap:RestorePlayers()
+end)
+
+Package.Subscribe("Unload", function()
+    if not bootstrap then return end
+
+    local success, err = xpcall(function()
+        bootstrap:SavePlayers()
+    end, debug.traceback)
+
+    if not success then
+        print("Failed to save player positions: " .. tostring(err))
+    end
+
+    bootstrap:Shutdown()
+    bootstrap = nil
+end)

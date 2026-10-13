@@ -10,8 +10,21 @@ DarkRP.Config.Currency = "$"
 DarkRP.Config.DefaultSalary = 45
 DarkRP.Config.DefaultWallet = 500
 DarkRP.Config.SalaryInterval = 60 -- in second
-DarkRP.Config.SetRPNameCommand = "/setrpname"
+DarkRP.Config.SetRPNameCommand = "/rpname"
 
+-- List of modules
+DarkRP.Config.Modules = {
+    SandboxControls = false,
+    CharacterCustomization = true,
+	ChatCommands = true
+}
+
+-- Global sandbox permissions
+DarkRP.Config.SandboxControls = {
+	ToggleNoClip = false,
+	EnterRagdoll = false,
+	RespawnCharacter = false
+}
 
 -- List of Character Meshes
 DarkRP.Config.CHARACTER_MESHES = {

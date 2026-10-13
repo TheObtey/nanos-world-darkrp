@@ -1,75 +1,56 @@
 # DarkRP for Nanos World
 
-A modern reimagining of the classic Garry's Mod **DarkRP** gamemode, built from scratch for **Nanos World**.
+An open-source, work-in-progress reimagining of Garry's Mod **DarkRP**, built for **Nanos World**.
 
-This gamemode aims to bring full roleplay mechanics, modular systems, and a clean architecture to Nanos World.
+The project focuses on a clean, modular foundation for building and extending a roleplay gamemode.
 
----
+## Current Features
 
-## 🚀 Features (WIP)
+- Persistent player profiles using SQLite (RP name, wallet and salary data)
+- Player spawning, character appearance and respawning
+- Chat commands, including `/rpname`
+- Optional modules for character customization and sandbox controls
+- Package hot reload with player position and character mesh restoration
 
-- Persistent player data (RP name, money)
-- RP name system via chat command (`/setrpname`)
-- Clean UI integration planned (WebUI HUD)
-- SQLite database integration (no external DB required)
-- Modular architecture
+## Project Structure
 
----
-
-## 🧠 Project Structure
-
-```
-darkrp/
-├── Client/
-│ ├── modules/ # Client-side systems (HUD, menus, etc.)
-│ ├── Init.lua # Client-side entry point
-│ └── Index.lua
-├── Server/
-│ ├── modules/ # Server-side modules (players, jobs, printers, etc.)
-│ ├── Init.lua # Server-side setup (DB, loading, etc.)
-│ └── Index.lua
-├── Shared/
-│ ├── Core.lua # Global DarkRP namespace
-│ └── Utils.lua # Utility functions
-├── UI/
-│ └── MainHUD.html # HUD (planned)
-└── Package.toml # Gamemode metadata
+```text
+Client/              Client-side entry points
+Server/
+  Init.lua           Package lifecycle entry point
+  Bootstrap.lua      Core setup and dependency wiring
+  Core/
+    Database/        Database access
+    Player/          Player profiles and lifecycle
+    Character/       Character spawning, appearance and lifecycle
+  Modules/
+    ModuleLoader.lua Optional module initialization and shutdown
+    Registry.lua     Available modules
+    ChatCommands/    RP chat commands
+    CharacterCustomization/
+    SandboxControls/
+Shared/              Shared namespace, configuration and utilities
+Package.toml         Nanos World package settings
 ```
 
----
+The **Core** contains essential gamemode systems. **Modules** provide optional features that can be enabled or disabled in `Shared/Config.lua`. The bootstrap assembles the Core, while the module loader handles optional modules.
 
-## ⚙️ Dependencies
+## Installation
 
-None for now — fully standalone.
+Place the `darkrp` package in your Nanos World `Packages` directory, then start a server with the `darkrp` gamemode.
 
----
+Configure the gamemode and its modules in `Shared/Config.lua`.
 
-## 📦 Installation
+## Status
 
-1. Clone or download this repository into your Nanos World `Packages` folder.
-2. Start a new server and select **"darkrp"** as your gamemode.
-3. Everything loads automatically. Have fun!
+The architecture and initial player systems are in place. Jobs, properties, economy gameplay and the full RP interface are planned for future development.
 
----
+## Contributing
 
-## 📚 To-Do
+The project is still in early development.
 
-- [ ] Job system
-- [ ] Salary system
-- [ ] Property ownership
-- [ ] Printers & spawnable entities
-- [ ] Voting / mayor system
-- [ ] Full HUD integration
+Feel free to fork it, suggest improvements, or use it as a base for your own RP ideas.
 
----
+Made with ❤️ by **TheObtey**
 
-## 💡 Contributions
-
-This project is in early development. Feel free to fork it, suggest improvements, or use it as a base for your own RP ideas.
-
----
-
-## 👑 Author
-
-Made with ❤️ by **TheObtey** 🫡  
 Discord tag: `theobtey`
